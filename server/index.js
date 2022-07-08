@@ -37,9 +37,7 @@ io.on("connection", (socket) => {
 
   socket.on("leaveRoom", () => {
     console.log("Leave room: ", socket.id);
-    const roomArr = Array.from(io.sockets.adapter.rooms);
-    const roomArrFiltered = roomArr.filter((room) => !room[1].has(room[0]));
-    socket.leave(roomArrFiltered[0][0]);
+    socket.leave([...socket.rooms][1]);
     const arr = Array.from(io.sockets.adapter.rooms);
     const filtered = arr.filter((room) => !room[1].has(room[0]));
     const res = filtered.flatMap((i) => {
