@@ -14,6 +14,10 @@ function App() {
   function joinRoom() {
     setSocketConnected(true);
     setSocketId(socket.id);
+    setMessages((messages) => [
+      ...messages,
+      { text: "Hi there, how can I help you today?", type: "admin" },
+    ]);
     socket.emit("clientJoinRoom", roomId);
   }
 
@@ -44,17 +48,22 @@ function App() {
     <>
       <div className="flex h-full flex-col py-1">
         <div className=" bg-gray-100 grow flex justify-end flex-col px-12 py-6">
-          {messages.length > 0 ? (
-            messages.map((msg, i) => {
-              return (
-                <div key={i} className={msg.type === "admin" ? "text-green-500" : "text-blue-500"}>
-                  {msg.text}
-                </div>
-              );
-            })
-          ) : (
-            <div>No messages</div>
-          )}
+          {messages.length > 0
+            ? messages.map((msg, i) => {
+                return (
+                  <span
+                    key={i}
+                    className={`text-white px-8 py-4 w-fit rounded-xl my-1 ${
+                      msg.type === "client"
+                        ? "bg-blue-500 text-right self-end"
+                        : "bg-gray-500 text-left self-start"
+                    }`}
+                  >
+                    {msg.text}
+                  </span>
+                );
+              })
+            : null}
         </div>
         <div className="bg-gray-100">
           <form
@@ -72,20 +81,22 @@ function App() {
             />
           </form>
         </div>
-        {!socketConnected ? (
-          <button className="bg-green-400 text-white px-3 py-2 rounded" onClick={joinRoom}>
-            Ask us a question
-          </button>
-        ) : (
-          <button
-            className="bg-red-400 text-white px-3 py-2 rounded"
-            onClick={() => {
-              leaveRoom(socket);
-            }}
-          >
-            Disconnect
-          </button>
-        )}
+        <div className="flex justify-center pt-1">
+          {!socketConnected ? (
+            <button className="bg-green-400 text-white px-3 py-2 rounded w-1/2" onClick={joinRoom}>
+              Ask us a question
+            </button>
+          ) : (
+            <button
+              className="bg-red-400 text-white px-3 py-2 rounded w-1/2 text-center"
+              onClick={() => {
+                leaveRoom(socket);
+              }}
+            >
+              Disconnect
+            </button>
+          )}
+        </div>
       </div>
     </>
   );

@@ -52,7 +52,7 @@ export default function Admin() {
   return (
     <div className="h-full">
       <div className="bg-gray-100 h-full flex flex-row">
-        <ul className="w-[150px] text-center py-4">
+        <ul className="w-[150px] text-center pt-4 pb-1 flex flex-col">
           {Array.isArray(rooms) &&
             rooms?.map((room) => {
               return room.members < 2 ? (
@@ -76,7 +76,7 @@ export default function Admin() {
             })}
           {roomId && (
             <button
-              className="my-1 bg-red-200 rounded-md px-2 py-1 cursor-pointer"
+              className="mt-auto mb-1 bg-red-200 rounded-md px-2 py-1 cursor-pointer"
               onClick={leaveRoom}
             >
               Leave Room {roomId.slice(0, 4)}
@@ -84,21 +84,23 @@ export default function Admin() {
           )}
         </ul>
         <div className="bg-gray-50 w-full flex flex-col">
-          <div className="mt-auto px-8 py-6">
-            {messages.length > 0 ? (
-              messages.map((msg, i) => {
-                return (
-                  <div
-                    key={i}
-                    className={msg.type === "client" ? "text-green-500" : "text-blue-500"}
-                  >
-                    {msg.text}
-                  </div>
-                );
-              })
-            ) : (
-              <div>No messages</div>
-            )}
+          <div className="mt-auto px-8 py-6 flex flex-col">
+            {messages.length > 0
+              ? messages.map((msg, i) => {
+                  return (
+                    <div
+                      key={i}
+                      className={`text-white px-8 py-4 w-fit rounded-xl my-1 ${
+                        msg.type === "admin"
+                          ? "bg-blue-500 text-right self-end"
+                          : "bg-gray-500 text-left self-start"
+                      }`}
+                    >
+                      {msg.text}
+                    </div>
+                  );
+                })
+              : null}
           </div>
           <div className="bg-gray-100 flex flex-col">
             <form
