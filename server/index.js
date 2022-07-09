@@ -7,47 +7,40 @@ const io = require("socket.io")(http, { cors: {} });
 
 let globalId = 0;
 
-// function handleClientConnect(socket) {
-//   console.log("Connected:", socket.id, new Date());
-//   socket.join(globalId++);
-//   emitRooms(socket);
-// }
+function logMessage(message, data) {
+  console.log(message, data);
+}
 
-// function handleClientDisconnect(socket) {
-//   console.log("Disconnected:", socket.id, new Date());
-//   emitRooms(socket);
-// }
-
-// function emitRooms(socket) {
-//   io.emit("rooms", io.sockets.adapter.rooms);
-// }
+function emitRooms() {
+  const filtered = [...io.sockets.adapter.rooms].filter((room) => !room[1].has(room[0]));
+  const res = filtered.map((i) => {
+    return { name: i[0], userId: [...i[1].values()][0], members: i[1].size };
+  });
+  io.emit("rooms", res);
+}
 
 io.on("connection", (socket) => {
-  socket.on("joinRoom", () => {
-    console.log("Join room:", socket.id);
+  socket.on("clientJoinRoom", () => {
+    logMessage("Client joined room:", socket.id);
     socket.join(String(globalId++));
+    emitRooms(socket);
+  });
 
-    const arr = Array.from(io.sockets.adapter.rooms);
-    const filtered = arr.filter((room) => !room[1].has(room[0]));
-    const res = filtered.flatMap((i) => {
-      return { name: i[0], userId: [...i[1].values()][0] };
-    });
-    io.emit("rooms", res);
+  socket.on("adminJoinRoom", (room) => {
+    logMessage("Admin joined room:", room);
+    socket.join(room);
+    emitRooms(socket);
   });
 
   socket.on("leaveRoom", () => {
-    console.log("Leave room: ", socket.id);
+    logMessage("Leave room: ", socket.id);
     socket.leave([...socket.rooms][1]);
-    const arr = Array.from(io.sockets.adapter.rooms);
-    const filtered = arr.filter((room) => !room[1].has(room[0]));
-    const res = filtered.flatMap((i) => {
-      return { name: i[0], userId: [...i[1].values()][0] };
-    });
-    io.emit("rooms", res);
+    emitRooms(socket);
   });
 
   socket.on("disconnect", () => {
-    console.log("Disconnected:", socket.id);
+    logMessage("Disconnected:", socket.id);
+    emitRooms(socket);
   });
 });
 
