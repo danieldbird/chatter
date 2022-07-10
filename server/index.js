@@ -5,8 +5,6 @@ const PORT = 3001;
 
 const io = require("socket.io")(http, { cors: {} });
 
-let globalId = 0;
-
 function logMessage(message, data) {
   console.log(message, data);
 }
@@ -20,9 +18,9 @@ function emitRooms() {
 }
 
 io.on("connection", (socket) => {
-  socket.on("clientJoinRoom", () => {
+  socket.on("clientJoinRoom", (roomId) => {
     logMessage("Client joined room:", socket.id);
-    socket.join(String(globalId++));
+    socket.join(roomId);
     emitRooms(socket);
   });
 
@@ -41,6 +39,14 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     logMessage("Disconnected:", socket.id);
     emitRooms(socket);
+  });
+
+  socket.on("sendClientMessage", (message, roomId) => {
+    io.in(roomId).emit("message", { text: message, type: "client" });
+  });
+
+  socket.on("sendAdminMessage", (message, roomId) => {
+    io.in(roomId).emit("message", { text: message, type: "admin" });
   });
 });
 
